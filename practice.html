@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bank of China Exercise System</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --primary-hover: #357abd;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --text-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --safe-area-inset-top: env(safe-area-inset-top, 0px);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-top: var(--safe-area-inset-top);
+            padding-bottom: var(--safe-area-inset-bottom);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ffffff;
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            min-height: 100vh;
+            background-color: #ffffff;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 16px 0 24px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 16px;
+            color: #000000;
+            border: 1px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+
+            background-image: url('bank_of_china.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* background-blend-mode: luminosity; */ /* Removed to make black text clearer */
+        }
+
+        .question::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.8);
+                z-index: 0;
+                pointer-events: none;
+            }
+
+        /* Style for the main question text paragraph */
+        .question > p {
+            position: relative;
+            z-index: 1;
+            font-weight: bold; /* Make text bolder */
+            font-size: 1.1em; /* Match option font size */
+        }
+        
+
+        .options {
+            margin-top: 12px;
+        }
+
+        .option {
+            margin: 10px 0;
+            padding: 14px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            font-size: 1.1em;
+        }
+
+        .option:active {
+            background-color: #f8f9fa;
+            border-color: var(--primary-color);
+        }
+
+        .selected {
+            background-color: #e8f4fd;
+            border-color: var(--primary-color);
+        }
+
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            -webkit-appearance: none;
+        }
+
+        button:active {
+            background-color: var(--primary-hover);
+            transform: scale(0.98);
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            border: 1px solid #e1e8ed;
+        }
+
+        .stats h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        .correct {
+            color: var(--success-color);
+        }
+
+        .incorrect {
+            color: var(--error-color);
+        }
+
+        .correct-answer {
+            background-color: #d4edda !important; /* 绿色背景表示正确答案 */
+            border-color: var(--success-color) !important;
+        }
+
+        .wrong-answer {
+            background-color: #f8d7da !important; /* 红色背景表示用户选错 */
+            border-color: var(--error-color) !important;
+        }
+
+        .user-selected.correct-answer {
+            /* 用户选择正确，保持正确答案的样式 */
+        }
+
+        .option.user-selected:not(.correct-answer) {
+             /* 用户选择但不是正确答案，已经是 wrong-answer */
+        }
+
+        .true-false-option.correct-answer {
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            color: #155724 !important;
+        }
+
+        .true-false-option.wrong-answer {
+            background-color: #f8d7da !important;
+            border-color: var(--error-color) !important;
+            color: #721c24 !important;
+        }
+
+        .question-type {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            font-weight: 500;
+            position: relative; /* Ensure it's above the overlay */
+            z-index: 1;       /* Ensure it's above the overlay */
+        }
+
+        .explanation {
+            margin-top: 16px;
+            padding: 16px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            display: none;
+            animation: fadeIn 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .true-false-options {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .true-false-option {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.6);
+            transition: var(--transition);
+            font-weight: bold; /* Make true-false option text bolder */
+            text-align: center;
+            font-size: 1.1em;
+            position: relative; /* Ensure it's above the overlay */
+            z-index: 1;       /* Ensure it's above the overlay */
+        }
+
+        .true-false-option:active {
+            background-color: #f8f9fa;
+            border-color: var(--primary-color);
+        }
+
+        .true-false-option.selected {
+            background-color: #e8f4fd;
+            border-color: var(--primary-color);
+        }
+
+        .short-answer-input {
+            width: 100%;
+            min-height: 120px;
+            margin: 12px 0;
+            padding: 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1.1em;
+            resize: none;
+            transition: var(--transition);
+        }
+
+        .short-answer-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .keywords {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .keyword {
+            display: inline-block;
+            margin: 4px;
+            padding: 8px 16px;
+            background-color: #e8f4fd;
+            border-radius: 20px;
+            color: var(--primary-color);
+            font-size: 0.9em;
+            transition: var(--transition);
+        }
+
+        .keyword:active {
+            background-color: #d1e7fd;
+        }
+
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 12px 0;
+            color: var(--primary-color);
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.3);
+        }
+
+        label {
+            cursor: pointer;
+            user-select: none;
+            font-size: 1.1em;
+            font-weight: bold; /* Make option label text bolder */
+            position: relative; /* Ensure it's above the overlay */
+            z-index: 1;       /* Ensure it's above the overlay */
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                min-height: auto;
+                padding: 24px;
+                border-radius: var(--border-radius);
+                margin-top: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+
+            .controls {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            button {
+                width: auto;
+                min-width: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bank of China Exercise System</h1>
+        <div class="controls">
+            <button onclick="loadRandomQuestion()">随机抽取题目</button>
+            <button onclick="checkAnswer()">提交答案</button>
+        </div>
+        <div id="questionContainer" class="question">
+            <p>点击"随机抽取题目"开始练习</p>
+        </div>
+        <div class="stats">
+            <h3>练习统计</h3>
+            <p>总题数：<span id="totalQuestions">0</span></p>
+            <p>正确数：<span id="correctAnswers">0</span></p>
+            <p>正确率：<span id="accuracy">0%</span></p>
+        </div>
+    </div>
+    <script src="single.js"></script>
+    <script src="duoxuan.js"></script>
+    <script src="panduan.js"></script>
+    <script src="jianda.js"></script>
+    <script>
+        // 添加调试代码
+        console.log('Questions loaded:', typeof questions !== 'undefined' ? questions.length : 'undefined');
+        console.log('DuoxuanQuestions loaded:', typeof duoxuanQuestions !== 'undefined' ? duoxuanQuestions.length : 'undefined');
+        console.log('JudgmentQuestions loaded:', typeof judgmentQuestions !== 'undefined' ? judgmentQuestions.length : 'undefined');
+        console.log('JiandaQuestions loaded:', typeof jiandaQuestions !== 'undefined' ? jiandaQuestions.length : 'undefined');
+
+        let currentQuestion = null;
+        let totalQuestions = 0;
+        let correctAnswers = 0;
+
+        function loadRandomQuestion() {
+            console.log('loadRandomQuestion called');
+            const singleChoiceWeightFactor = 2; // 单选题的权重因子
+
+            const allQuestionSources = [
+                { type: 'single', questions: typeof questions !== 'undefined' ? questions : [], weightFactor: singleChoiceWeightFactor },
+                { type: 'multiple', questions: typeof duoxuanQuestions !== 'undefined' ? duoxuanQuestions : [], weightFactor: 1 },
+                { type: 'judgment', questions: typeof judgmentQuestions !== 'undefined' ? judgmentQuestions : [], weightFactor: 1 },
+                { type: 'short_answer', questions: typeof jiandaQuestions !== 'undefined' ? jiandaQuestions : [], weightFactor: 1 }
+            ];
+
+            let weightedPool = [];
+            let totalEffectiveQuestions = 0;
+
+            allQuestionSources.forEach(src => {
+                const count = src.questions.length;
+                if (count > 0) {
+                    const effectiveCount = count * src.weightFactor;
+                    totalEffectiveQuestions += effectiveCount;
+                    for (let i = 0; i < effectiveCount; i++) {
+                        weightedPool.push(src.type);
+                    }
+                }
+            });
+
+            if (weightedPool.length === 0) {
+                console.error('No questions available or weighted pool is empty.');
+                document.getElementById('questionContainer').innerHTML = '<p>所有题库均为空或权重计算后为空，无法抽取题目。</p>';
+                const checkAnswerButton = document.querySelector('button[onclick="checkAnswer()"]');
+                if (checkAnswerButton) checkAnswerButton.disabled = true;
+                return;
+            }
+            
+            console.log('Total effective questions (sum of weighted counts):', totalEffectiveQuestions);
+            console.log('Weighted pool size:', weightedPool.length);
+
+            // 从加权池中随机选择一个题目类型
+            const randomTypeKey = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+            const selectedTypeSource = allQuestionSources.find(src => src.type === randomTypeKey);
+
+            if (!selectedTypeSource || selectedTypeSource.questions.length === 0) {
+                console.error('Selected type source is invalid or has no questions:', selectedTypeSource);
+                // Fallback or error message
+                document.getElementById('questionContainer').innerHTML = '<p>抽取题目时发生错误，请重试。</p>';
+                return;
+            }
+
+            console.log('Selected type by weight:', selectedTypeSource.type);
+            
+            // 从选中的类型中随机选择一个题目
+            const randomIndex = Math.floor(Math.random() * selectedTypeSource.questions.length);
+            console.log('Selected index:', randomIndex);
+            
+            currentQuestion = {
+                ...selectedTypeSource.questions[randomIndex],
+                type: selectedTypeSource.type
+            };
+            console.log('Current question:', currentQuestion);
+
+            displayQuestion(currentQuestion);
+            // 重新启用提交按钮
+            const checkAnswerButton = document.querySelector('button[onclick="checkAnswer()"]');
+            if (checkAnswerButton) {
+                checkAnswerButton.disabled = false;
+            }
+        }
+
+        function displayQuestion(question) {
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = '';
+
+            // 显示题目类型
+            const typeText = {
+                'single': '单选题',
+                'multiple': '多选题',
+                'judgment': '判断题',
+                'short_answer': '问答题'
+            }[question.type];
+
+            const typeElement = document.createElement('div');
+            typeElement.className = 'question-type';
+            typeElement.textContent = typeText;
+            container.appendChild(typeElement);
+
+            // 显示题目内容
+            const questionText = document.createElement('p');
+            questionText.textContent = question.question;
+            container.appendChild(questionText);
+
+            // 根据题目类型显示不同的答题区域
+            switch(question.type) {
+                case 'single':
+                    createSingleChoiceOptions(question, container);
+                    break;
+                case 'multiple':
+                    createMultipleChoiceOptions(question, container);
+                    break;
+                case 'judgment':
+                    createJudgmentOptions(container);
+                    break;
+                case 'short_answer':
+                    createShortAnswerArea(question, container);
+                    break;
+            }
+        }
+
+        function createSingleChoiceOptions(question, container) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'answer';
+                radio.value = String.fromCharCode(65 + index); // A, B, C, D...
+                
+                const label = document.createElement('label');
+                label.textContent = option;
+                
+                optionDiv.appendChild(radio);
+                optionDiv.appendChild(label);
+                optionsDiv.appendChild(optionDiv);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function createMultipleChoiceOptions(question, container) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'answer';
+                checkbox.value = String.fromCharCode(65 + index); // A, B, C, D...
+                
+                const label = document.createElement('label');
+                label.textContent = option;
+                
+                optionDiv.appendChild(checkbox);
+                optionDiv.appendChild(label);
+                optionsDiv.appendChild(optionDiv);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function createJudgmentOptions(container) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'true-false-options';
+
+            const options = [
+                { value: true, text: '正确' },
+                { value: false, text: '错误' }
+            ];
+
+            options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'true-false-option';
+                optionDiv.textContent = option.text;
+                optionDiv.onclick = function() {
+                    document.querySelectorAll('.true-false-option').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    this.dataset.selected = option.value;
+                };
+                optionsDiv.appendChild(optionDiv);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function createShortAnswerArea(question, container) {
+            const answerArea = document.createElement('div');
+            answerArea.className = 'short-answer-area';
+
+            const textarea = document.createElement('textarea');
+            textarea.className = 'short-answer-input';
+            textarea.placeholder = '请在此输入你的答案...';
+            answerArea.appendChild(textarea);
+
+            if (question.keywords) {
+                const keywordsDiv = document.createElement('div');
+                keywordsDiv.className = 'keywords';
+                keywordsDiv.innerHTML = '<strong>关键词：</strong>';
+                
+                question.keywords.forEach(keyword => {
+                    const keywordSpan = document.createElement('span');
+                    keywordSpan.className = 'keyword';
+                    keywordSpan.textContent = keyword;
+                    keywordsDiv.appendChild(keywordSpan);
+                });
+                
+                answerArea.appendChild(keywordsDiv);
+            }
+
+            container.appendChild(answerArea);
+        }
+
+        function checkAnswer() {
+            if (!currentQuestion) {
+                alert('请先抽取题目！');
+                return;
+            }
+
+            let isCorrect = false;
+            let userAnswer;
+            const optionsContainer = document.getElementById('questionContainer').querySelector('.options');
+
+            switch(currentQuestion.type) {
+                case 'single':
+                    const selectedRadio = document.querySelector('input[name="answer"]:checked');
+                    if (selectedRadio) {
+                        userAnswer = selectedRadio.value;
+                        isCorrect = userAnswer === currentQuestion.answer;
+
+                        // 移除之前的样式
+                        document.querySelectorAll('.option').forEach(opt => {
+                            opt.classList.remove('correct-answer', 'wrong-answer', 'user-selected');
+                            opt.querySelector('input').disabled = true;
+                            opt.onclick = null; // 移除点击事件
+                        });
+
+                        const options = Array.from(document.querySelectorAll('.option input[name="answer"]'));
+                        options.forEach(optionInput => {
+                            const optionDiv = optionInput.parentElement;
+                            if (optionInput.value === currentQuestion.answer) {
+                                optionDiv.classList.add('correct-answer');
+                            }
+                            if (optionInput.value === userAnswer) {
+                                optionDiv.classList.add('user-selected');
+                                if (!isCorrect) {
+                                    optionDiv.classList.add('wrong-answer');
+                                }
+                            }
+                        });
+
+                    } else {
+                        alert('请选择一个答案！');
+                        return;
+                    }
+                    break;
+                case 'multiple':
+                    const selectedCheckboxes = Array.from(document.querySelectorAll('input[name="answer"]:checked'))
+                                                    .map(cb => cb.value);
+                    userAnswer = selectedCheckboxes.sort().join(''); // 排序以确保与答案格式一致
+                    const correctAnswerMultiple = currentQuestion.answer.split('').sort().join('');
+                    isCorrect = userAnswer === correctAnswerMultiple;
+                    if (selectedCheckboxes.length === 0) {
+                        alert('请至少选择一个答案！');
+                        return;
+                    }
+                    // 禁用所有选项并显示正确/错误
+                    document.querySelectorAll('.option input[type="checkbox"]').forEach(cb => {
+                        cb.disabled = true;
+                        const optionDiv = cb.parentElement;
+                        optionDiv.classList.remove('correct-answer', 'wrong-answer', 'user-selected');
+                        if (currentQuestion.answer.includes(cb.value)) {
+                            optionDiv.classList.add('correct-answer');
+                        }
+                        if (selectedCheckboxes.includes(cb.value)) {
+                            optionDiv.classList.add('user-selected');
+                            if (!currentQuestion.answer.includes(cb.value)) {
+                                optionDiv.classList.add('wrong-answer');
+                            }
+                        }
+                    });
+                    break;
+                case 'judgment':
+                    const selectedJudgment = document.querySelector('.true-false-option.selected');
+                    if (selectedJudgment) {
+                        userAnswer = selectedJudgment.dataset.selected === 'true';
+                        isCorrect = userAnswer === currentQuestion.answer;
+                        document.querySelectorAll('.true-false-option').forEach(opt => {
+                            opt.onclick = null; // 禁用点击
+                            opt.classList.remove('correct-answer', 'wrong-answer');
+                            const optValue = opt.dataset.selected === 'true';
+                            if (optValue === currentQuestion.answer) {
+                                opt.classList.add('correct-answer');
+                            }
+                            if (opt === selectedJudgment && !isCorrect) {
+                                opt.classList.add('wrong-answer');
+                            }
+                        });
+                    } else {
+                        alert('请选择正确或错误！');
+                        return;
+                    }
+                    break;
+                case 'short_answer':
+                    const shortAnswerInput = document.getElementById('shortAnswerInput');
+                    userAnswer = shortAnswerInput.value.trim();
+                    shortAnswerInput.disabled = true;
+                    // 简单实现：检查答案是否包含所有关键词
+                    if (currentQuestion.keywords && currentQuestion.keywords.length > 0) {
+                        isCorrect = currentQuestion.keywords.every(keyword => userAnswer.includes(keyword));
+                    } else {
+                        // 如果没有关键词，可以认为只要有输入就算部分正确，或者需要更复杂的判断逻辑
+                        isCorrect = userAnswer.length > 0; 
+                    }
+                    const explanationDiv = document.getElementById('explanationArea') || document.createElement('div');
+                    explanationDiv.id = 'explanationArea';
+                    explanationDiv.className = 'explanation';
+                    explanationDiv.innerHTML = `<strong>参考答案：</strong> ${currentQuestion.answer}`;
+                    if (currentQuestion.keywords && currentQuestion.keywords.length > 0) {
+                        explanationDiv.innerHTML += `<br><strong>关键词：</strong> ${currentQuestion.keywords.join(', ')}`;
+                    }
+                    shortAnswerInput.parentElement.appendChild(explanationDiv);
+                    explanationDiv.style.display = 'block';
+                    break;
+            }
+
+            totalQuestions++;
+            if (isCorrect) {
+                correctAnswers++;
+                // alert('回答正确！'); // 改为通过样式提示
+            } else {
+                // alert('回答错误！正确答案是：' + currentQuestion.answer); // 改为通过样式提示
+            }
+            if (currentQuestion.type !== 'short_answer') {
+                const resultMessage = document.createElement('div');
+                resultMessage.className = 'explanation'; // 复用样式
+                resultMessage.style.display = 'block';
+                resultMessage.style.marginTop = '10px';
+                resultMessage.style.textAlign = 'center';
+                if (isCorrect) {
+                    resultMessage.textContent = '回答正确！';
+                    resultMessage.style.color = 'var(--success-color)';
+                } else {
+                    resultMessage.textContent = '回答错误！正确答案已高亮显示。';
+                    if (currentQuestion.type === 'single' || currentQuestion.type === 'multiple') {
+                         resultMessage.textContent = `回答错误！正确答案是 ${currentQuestion.answer}。`;
+                    }
+                    resultMessage.style.color = 'var(--error-color)';
+                }
+                document.getElementById('questionContainer').appendChild(resultMessage);
+            }
+
+
+            updateStats();
+            // 禁用提交按钮，防止重复提交
+            document.querySelector('button[onclick="checkAnswer()"]').disabled = true;
+        }
+
+        function showExplanation(isCorrect, question) {
+            const container = document.getElementById('questionContainer');
+            
+            const explanationDiv = document.createElement('div');
+            explanationDiv.className = 'explanation';
+            explanationDiv.style.display = 'block';
+            
+            let explanationText = isCorrect ? '回答正确！' : '回答错误。';
+            
+            switch(question.type) {
+                case 'single':
+                case 'multiple':
+                    explanationText += ' 正确答案是：' + question.answer.join(', ');
+                    break;
+                case 'judgment':
+                    explanationText += ' 正确答案是：' + (question.answer ? '正确' : '错误');
+                    break;
+                case 'short_answer':
+                    if (question.answer) {
+                        explanationText += '\n参考答案：' + question.answer;
+                    }
+                    break;
+            }
+            
+            explanationDiv.textContent = explanationText;
+            explanationDiv.className += isCorrect ? ' correct' : ' incorrect';
+            
+            container.appendChild(explanationDiv);
+        }
+
+        // 初始加载一道题目
+        loadRandomQuestion();
+    </script>
+</body>
+</html>
