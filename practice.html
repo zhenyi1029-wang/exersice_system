@@ -641,8 +641,8 @@
                 case 'multiple':
                     const selectedCheckboxes = Array.from(document.querySelectorAll('input[name="answer"]:checked'))
                                                     .map(cb => cb.value);
-                    userAnswer = selectedCheckboxes.sort().join(''); // 排序以确保与答案格式一致
-                    const correctAnswerMultiple = currentQuestion.answer.split('').sort().join('');
+                    userAnswer = selectedCheckboxes.sort().join(','); // 使用逗号分隔符
+                    const correctAnswerMultiple = currentQuestion.answer.sort().join(','); // 正确答案是数组，直接排序后连接
                     isCorrect = userAnswer === correctAnswerMultiple;
                     if (selectedCheckboxes.length === 0) {
                         alert('请至少选择一个答案！');
