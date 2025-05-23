@@ -361,6 +361,7 @@
         <h1>Bank of China Exercise System</h1>
         <div class="controls">
             <button onclick="loadRandomQuestion()">随机抽取题目</button>
+            <button onclick="loadPreviousQuestion()" disabled>上一题</button>
             <button onclick="checkAnswer()">提交答案</button>
         </div>
         <div id="questionContainer" class="question">
@@ -387,8 +388,20 @@
         let currentQuestion = null;
         let totalQuestions = 0;
         let correctAnswers = 0;
+        let questionHistory = []; // 存储题目历史记录
+        const maxHistorySize = 10; // 最大历史记录大小
 
         function loadRandomQuestion() {
+            // 在加载新题目之前，将当前题目添加到历史记录（如果存在）
+            if (currentQuestion) {
+                questionHistory.push(currentQuestion);
+                // 保持历史记录在指定大小内
+                if (questionHistory.length > maxHistorySize) {
+                    questionHistory.shift(); // 移除最旧的题目
+                }
+            }
+
+            console.log('loadRandomQuestion called');
             console.log('loadRandomQuestion called');
             const singleChoiceWeightFactor = 2; // 单选题的权重因子
 
@@ -453,7 +466,39 @@
             if (checkAnswerButton) {
                 checkAnswerButton.disabled = false;
             }
+            // 根据历史记录状态启用/禁用上一题按钮
+            updatePreviousButtonState();
         }
+
+        function loadPreviousQuestion() {
+            console.log('loadPreviousQuestion called');
+            if (questionHistory.length > 0) {
+                // 从历史记录中取出最后一个题目
+                currentQuestion = questionHistory.pop();
+                displayQuestion(currentQuestion);
+                // 根据历史记录状态启用/禁用上一题按钮
+                updatePreviousButtonState();
+                // 确保提交答案按钮可用
+                const checkAnswerButton = document.querySelector('button[onclick="checkAnswer()"]');
+                if (checkAnswerButton) {
+                    checkAnswerButton.disabled = false;
+                }
+            } else {
+                console.log('No previous questions in history.');
+            }
+        }
+
+        function updatePreviousButtonState() {
+            const prevButton = document.querySelector('button[onclick="loadPreviousQuestion()"]');
+            if (prevButton) {
+                prevButton.disabled = questionHistory.length === 0;
+            }
+        }
+
+        // 初始禁用上一题按钮
+        document.addEventListener('DOMContentLoaded', updatePreviousButtonState);
+
+        
 
         function displayQuestion(question) {
             const container = document.getElementById('questionContainer');
