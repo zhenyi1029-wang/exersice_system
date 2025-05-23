@@ -672,15 +672,20 @@
                         isCorrect = userAnswer === currentQuestion.answer;
                         document.querySelectorAll('.true-false-option').forEach(opt => {
                             opt.onclick = null; // 禁用点击
-                            opt.classList.remove('correct-answer', 'wrong-answer');
-                            const optValue = opt.dataset.selected === 'true';
-                            if (optValue === currentQuestion.answer) {
-                                opt.classList.add('correct-answer');
-                            }
-                            if (opt === selectedJudgment && !isCorrect) {
-                                opt.classList.add('wrong-answer');
-                            }
+                            opt.classList.remove('correct-answer', 'wrong-answer', 'selected'); // 移除 selected 类
                         });
+
+                        const correctOptionValue = currentQuestion.answer;
+                        const correctOptionElement = document.querySelector(`.true-false-option[data-selected='${correctOptionValue}']`);
+                        const selectedOptionElement = selectedJudgment;
+
+                        if (correctOptionElement) {
+                            correctOptionElement.classList.add('correct-answer');
+                        }
+
+                        if (!isCorrect && selectedOptionElement) {
+                            selectedOptionElement.classList.add('wrong-answer');
+                        }
                     } else {
                         alert('请选择正确或错误！');
                         return;
