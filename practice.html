@@ -645,6 +645,10 @@
                 
                 optionDiv.appendChild(radio);
                 optionDiv.appendChild(label);
+                // Add click listener to the option div to toggle the radio button
+                optionDiv.addEventListener('click', function() {
+                    radio.checked = true;
+                });
                 optionsDiv.appendChild(optionDiv);
             });
 
@@ -669,6 +673,10 @@
                 
                 optionDiv.appendChild(checkbox);
                 optionDiv.appendChild(label);
+                // Add click listener to the option div to toggle the checkbox
+                optionDiv.addEventListener('click', function() {
+                    checkbox.checked = !checkbox.checked;
+                });
                 optionsDiv.appendChild(optionDiv);
             });
 
