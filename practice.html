@@ -6,13 +6,15 @@
     <title>Bank of China Exercise System</title>
     <style>
         :root {
-            --primary-color: #4a90e2;
-            --primary-hover: #357abd;
+            --primary-color: #c92c2c; /* 中国银行红色 */
+            --primary-hover: #a82222;
+            --secondary-color: #f5f5f5;
             --success-color: #2ecc71;
             --error-color: #e74c3c;
-            --text-color: #2c3e50;
+            --text-color: #333333;
             --bg-color: #f8f9fa;
-            --border-radius: 12px;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
             --safe-area-inset-top: env(safe-area-inset-top, 0px);
             --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
@@ -27,24 +29,30 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            background-color: #f5f5f5;
             color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
             padding-top: var(--safe-area-inset-top);
             padding-bottom: var(--safe-area-inset-bottom);
             position: relative;
+            background-image: linear-gradient(to bottom, #f8f8f8, #eaeaea);
         }
 
         body::before {
             content: '';
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ffffff;
+            background-image: url('bank_of_china.png');
+            background-size: 200px;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.03;
             z-index: -1;
+            pointer-events: none;
         }
 
         .container {
@@ -53,10 +61,10 @@
             max-width: 100%;
             min-height: 100vh;
             background-color: #ffffff;
-            padding: 16px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--box-shadow);
             backdrop-filter: blur(5px);
         }
 
@@ -66,13 +74,28 @@
             margin: 16px 0 24px;
             font-size: 1.8em;
             font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px;
         }
 
         .question {
             margin-bottom: 20px;
-            padding: 16px;
+            padding: 20px;
             color: #000000;
-            border: 1px solid #e1e8ed;
+            border: none;
             border-radius: var(--border-radius);
             position: relative;
             background-color: rgba(255, 255, 255, 0.9);
@@ -120,11 +143,20 @@
             align-items: center;
             transition: var(--transition);
             font-size: 1.1em;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .option:hover {
+            border-color: #ccd6dd;
+            background-color: rgba(249, 249, 249, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .option:active {
             background-color: #f8f9fa;
             border-color: var(--primary-color);
+            transform: translateY(0);
         }
 
         .selected {
@@ -154,25 +186,53 @@
             transition: var(--transition);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             -webkit-appearance: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        button:hover::after {
+            left: 100%;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
 
         button:active {
             background-color: var(--primary-hover);
             transform: scale(0.98);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .stats {
             margin-top: 20px;
-            padding: 16px;
+            padding: 20px;
             background-color: #f8f9fa;
             border-radius: var(--border-radius);
             border: 1px solid #e1e8ed;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
         .stats h3 {
             color: var(--primary-color);
             margin-top: 0;
             font-size: 1.2em;
+            border-bottom: 2px solid rgba(201, 44, 44, 0.2);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .correct {
@@ -250,7 +310,7 @@
             border: 2px solid #e1e8ed;
             border-radius: var(--border-radius);
             cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.6);
+            background-color: rgba(255, 255, 255, 0.8);
             transition: var(--transition);
             font-weight: bold; /* Make true-false option text bolder */
             text-align: center;
@@ -259,9 +319,17 @@
             z-index: 1;       /* Ensure it's above the overlay */
         }
 
+        .true-false-option:hover {
+            border-color: #ccd6dd;
+            background-color: rgba(249, 249, 249, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
         .true-false-option:active {
             background-color: #f8f9fa;
             border-color: var(--primary-color);
+            transform: translateY(0);
         }
 
         .true-false-option.selected {
@@ -280,12 +348,13 @@
             font-size: 1.1em;
             resize: none;
             transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .short-answer-input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            box-shadow: 0 0 0 3px rgba(201, 44, 44, 0.1), inset 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .keywords {
@@ -334,14 +403,14 @@
 
         @media (min-width: 768px) {
             .container {
-                max-width: 600px;
+                max-width: 700px;
                 margin: 0 auto;
                 min-height: auto;
-                padding: 24px;
+                padding: 30px;
                 border-radius: var(--border-radius);
                 margin-top: 20px;
                 margin-bottom: 20px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             }
 
             .controls {
@@ -352,6 +421,10 @@
             button {
                 width: auto;
                 min-width: 160px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
             }
         }
     </style>
@@ -371,7 +444,20 @@
             <h3>练习统计</h3>
             <p>总题数：<span id="totalQuestions">0</span></p>
             <p>正确数：<span id="correctAnswers">0</span></p>
+            <p>错误数：<span id="incorrectAnswers">0</span></p> <!- 新增错误数统计 ->
             <p>正确率：<span id="accuracy">0%</span></p>
+            <button onclick="showIncorrectQuestions()" id="showIncorrectBtn" style="margin-top: 10px; background-color: var(--error-color);" disabled>查看错题</button>
+        </div>
+        
+        <!-- 错题查看模态框 -->
+        <div id="incorrectModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 80%; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px;">
+                    <h3 style="margin: 0; color: var(--primary-color);">错题回顾</h3>
+                    <button onclick="closeIncorrectModal()" style="background: var(--error-color); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">关闭</button>
+                </div>
+                <div id="incorrectQuestionsContent"></div>
+            </div>
         </div>
     </div>
     <script src="single.js"></script>
@@ -388,7 +474,9 @@
         let currentQuestion = null;
         let totalQuestions = 0;
         let correctAnswers = 0;
+        let incorrectAnswersCount = 0; // 新增错误计数器
         let questionHistory = []; // 存储题目历史记录
+        let incorrectQuestions = []; // 存储做错的题目
         const maxHistorySize = 10; // 最大历史记录大小
 
         function loadRandomQuestion() {
@@ -764,6 +852,14 @@
                 correctAnswers++;
                 // alert('回答正确！'); // 改为通过样式提示
             } else {
+                incorrectAnswersCount++; // 增加错误计数
+                // 记录错误题目
+                const incorrectQuestion = {
+                    ...currentQuestion,
+                    userAnswer: userAnswer,
+                    timestamp: new Date().toLocaleString()
+                };
+                incorrectQuestions.push(incorrectQuestion);
                 // alert('回答错误！正确答案是：' + currentQuestion.answer); // 改为通过样式提示
             }
             if (currentQuestion.type !== 'short_answer') {
@@ -819,6 +915,94 @@
             explanationDiv.className += isCorrect ? ' correct' : ' incorrect';
             
             container.appendChild(explanationDiv);
+        }
+
+        function showIncorrectQuestions() {
+            if (incorrectQuestions.length === 0) {
+                alert('暂无错题记录！');
+                return;
+            }
+            
+            const modal = document.getElementById('incorrectModal');
+            const content = document.getElementById('incorrectQuestionsContent');
+            
+            content.innerHTML = '';
+            
+            incorrectQuestions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.style.cssText = 'margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;';
+                
+                const typeText = {
+                    'single': '单选题',
+                    'multiple': '多选题', 
+                    'judgment': '判断题',
+                    'short_answer': '问答题'
+                }[question.type];
+                
+                let userAnswerText = '';
+                let correctAnswerText = '';
+                
+                switch(question.type) {
+                    case 'single':
+                        userAnswerText = question.userAnswer;
+                        correctAnswerText = question.answer;
+                        break;
+                    case 'multiple':
+                        userAnswerText = question.userAnswer;
+                        correctAnswerText = Array.isArray(question.answer) ? question.answer.join(', ') : question.answer;
+                        break;
+                    case 'judgment':
+                        userAnswerText = question.userAnswer ? '正确' : '错误';
+                        correctAnswerText = question.answer ? '正确' : '错误';
+                        break;
+                    case 'short_answer':
+                        userAnswerText = question.userAnswer;
+                        correctAnswerText = question.answer;
+                        break;
+                }
+                
+                questionDiv.innerHTML = `
+                    <div style="color: var(--primary-color); font-weight: bold; margin-bottom: 8px;">
+                        ${typeText} - 第${index + 1}题 (${question.timestamp})
+                    </div>
+                    <div style="margin-bottom: 10px; font-weight: bold;">
+                        题目：${question.question}
+                    </div>
+                    <div style="margin-bottom: 8px; color: var(--error-color);">
+                        你的答案：${userAnswerText}
+                    </div>
+                    <div style="color: var(--success-color);">
+                        正确答案：${correctAnswerText}
+                    </div>
+                `;
+                
+                content.appendChild(questionDiv);
+            });
+            
+            modal.style.display = 'block';
+        }
+        
+        function closeIncorrectModal() {
+            document.getElementById('incorrectModal').style.display = 'none';
+        }
+        
+        function updateStats() {
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+            document.getElementById('correctAnswers').textContent = correctAnswers;
+            document.getElementById('incorrectAnswers').textContent = incorrectAnswersCount;
+            
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            // 启用或禁用查看错题按钮
+            const showIncorrectBtn = document.getElementById('showIncorrectBtn');
+            if (incorrectQuestions.length > 0) {
+                showIncorrectBtn.disabled = false;
+                showIncorrectBtn.textContent = `查看错题 (${incorrectQuestions.length})`;
+            } else {
+                showIncorrectBtn.disabled = true;
+                showIncorrectBtn.textContent = '查看错题';
+            }
         }
 
         // 初始加载一道题目
